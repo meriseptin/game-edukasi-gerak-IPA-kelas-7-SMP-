@@ -1,0 +1,1123 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Petualangan Penjelajah Gerak: Misi Mencari Harta Karun Ilmu</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * {
+            font-family: 'Nunito', sans-serif;
+            touch-action: manipulation;
+            user-select: none;
+        }
+        h1, h2, h3, .font-fun {
+            font-family: 'Fredoka', cursive;
+        }
+        canvas {
+            background: linear-gradient(to bottom, #87CEEB, #E0F6FF);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+            border-radius: 1rem;
+        }
+        .btn-bounce:hover {
+            transform: scale(1.05);
+        }
+        .btn-bounce:active {
+            transform: scale(0.95);
+        }
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #fbbf24;
+            border-radius: 10px;
+        }
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+        .animate-float {
+            animation: float 3s ease-in-out infinite;
+        }
+    </style>
+</head>
+<body class="bg-slate-900 text-slate-800 min-h-screen flex flex-col justify-between overflow-x-hidden">
+
+    <!-- Top Navigation / Status Header -->
+    <header id="game-header" class="hidden bg-amber-500 text-white p-3 shadow-md border-b-4 border-amber-600 sticky top-0 z-50">
+        <div class="max-w-5xl mx-auto flex justify-between items-center">
+            <div class="flex items-center space-x-3">
+                <div class="bg-amber-700 p-2 rounded-lg text-white font-bold flex items-center gap-2">
+                    <i class="fas fa-user-astronaut"></i>
+                    <span id="header-player-name">Penjelajah</span>
+                    <span id="header-player-class" class="text-xs bg-amber-400 px-2 py-0.5 rounded text-amber-950 font-black">7D</span>
+                </div>
+            </div>
+            
+            <div class="flex items-center space-x-4">
+                <div class="flex items-center gap-1 bg-amber-600 px-3 py-1 rounded-full border border-amber-400">
+                    <i class="fas fa-coins text-yellow-300"></i>
+                    <span id="score-coins" class="font-bold">0</span>
+                </div>
+                <div class="flex items-center gap-1 bg-amber-600 px-3 py-1 rounded-full border border-amber-400">
+                    <i class="fas fa-star text-yellow-300"></i>
+                    <span id="score-stars" class="font-bold">0</span>
+                </div>
+                
+                <!-- Audio Controls -->
+                <button id="btn-toggle-audio" onclick="toggleAudio()" class="bg-amber-600 hover:bg-amber-700 w-10 h-10 rounded-full flex items-center justify-center transition">
+                    <i id="audio-icon" class="fas fa-volume-up"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Dynamic Content Wrapper -->
+    <main class="flex-grow flex items-center justify-center p-2 sm:p-4">
+        
+        <!-- 1. LANDING / FORM SCREEN -->
+        <section id="screen-welcome" class="max-w-3xl w-full bg-white rounded-3xl p-6 sm:p-10 shadow-2xl border-4 border-amber-400 text-center relative overflow-hidden my-auto">
+            <div class="absolute -top-10 -right-10 w-40 h-40 bg-yellow-200 rounded-full blur-2xl opacity-50"></div>
+            <div class="absolute -bottom-10 -left-10 w-40 h-40 bg-emerald-200 rounded-full blur-2xl opacity-50"></div>
+
+            <div class="relative z-10">
+                <div class="inline-block bg-emerald-100 text-emerald-800 font-bold px-4 py-1.5 rounded-full text-sm mb-3">
+                    <i class="fas fa-atom mr-1"></i> IPA Kelas VII SMP - Gerak Benda
+                </div>
+                <h1 class="text-3xl sm:text-5xl font-black text-amber-500 mb-2 leading-tight tracking-wide drop-shadow-sm">
+                    PETUALANGAN PENJELAJAH GERAK
+                </h1>
+                <p class="text-emerald-700 font-bold text-lg sm:text-xl mb-6">Misi Mencari Harta Karun Ilmu</p>
+
+                <!-- Avatar Cartoon Preview -->
+                <div class="flex justify-center items-center gap-4 my-6">
+                    <div class="w-24 h-24 bg-amber-100 rounded-2xl border-4 border-amber-400 flex items-center justify-center animate-float">
+                        <i class="fas fa-user-ninja text-5xl text-amber-600"></i>
+                    </div>
+                    <div class="text-left max-w-xs">
+                        <p class="text-xs text-slate-500 font-semibold">SMP Negeri 1 Muara Rupit</p>
+                        <p class="text-sm text-slate-700 font-bold">Jelajahi 6 Wilayah Ajaib & Kumpulkan Koin Ilmu Pengetahuan!</p>
+                    </div>
+                </div>
+
+                <!-- Registration Form -->
+                <div class="bg-amber-50 p-5 rounded-2xl border-2 border-amber-200 max-w-md mx-auto mb-6 text-left">
+                    <div class="mb-4">
+                        <label class="block text-slate-700 font-bold mb-2 text-sm" for="input-name">
+                            <i class="fas fa-signature text-amber-500 mr-1"></i> Nama Lengkap Peserta Didik:
+                        </label>
+                        <input type="text" id="input-name" placeholder="Masukkan nama kamu..." 
+                            class="w-full px-4 py-3 rounded-xl border-2 border-amber-300 focus:border-amber-500 focus:outline-none font-bold text-slate-700 bg-white">
+                    </div>
+                    <div class="mb-2">
+                        <label class="block text-slate-700 font-bold mb-2 text-sm">
+                            <i class="fas fa-users text-amber-500 mr-1"></i> Pilih Kelas:
+                        </label>
+                        <div class="grid grid-cols-4 gap-2">
+                            <button type="button" onclick="selectClass('7D')" class="btn-class border-2 border-amber-300 bg-white font-bold py-2 rounded-xl hover:bg-amber-200 transition">7D</button>
+                            <button type="button" onclick="selectClass('7E')" class="btn-class border-2 border-amber-300 bg-white font-bold py-2 rounded-xl hover:bg-amber-200 transition">7E</button>
+                            <button type="button" onclick="selectClass('7F')" class="btn-class border-2 border-amber-300 bg-white font-bold py-2 rounded-xl hover:bg-amber-200 transition">7F</button>
+                            <button type="button" onclick="selectClass('7G')" class="btn-class border-2 border-amber-300 bg-white font-bold py-2 rounded-xl hover:bg-amber-200 transition">7G</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Buttons -->
+                <div class="flex flex-col sm:flex-row gap-3 justify-center">
+                    <button onclick="startGame()" class="btn-bounce bg-emerald-500 hover:bg-emerald-600 text-white font-black text-lg px-8 py-4 rounded-2xl shadow-lg border-b-4 border-emerald-700 flex items-center justify-center gap-2">
+                        <i class="fas fa-play"></i> MULAI PETUALANGAN
+                    </button>
+                    <button onclick="showRules()" class="btn-bounce bg-sky-500 hover:bg-sky-600 text-white font-bold px-6 py-4 rounded-2xl shadow-md border-b-4 border-sky-700 flex items-center justify-center gap-2">
+                        <i class="fas fa-book-open"></i> CARA BERMAIN
+                    </button>
+                    <button onclick="showAbout()" class="btn-bounce bg-slate-600 hover:bg-slate-700 text-white font-bold px-4 py-4 rounded-2xl shadow-md border-b-4 border-slate-800 flex items-center justify-center gap-2">
+                        <i class="fas fa-info-circle"></i> TENTANG
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- 2. RULES & TUTORIAL SCREEN -->
+        <section id="screen-rules" class="hidden max-w-3xl w-full bg-white rounded-3xl p-6 sm:p-8 shadow-2xl border-4 border-sky-400">
+            <h2 class="text-2xl sm:text-3xl font-black text-sky-600 mb-4 flex items-center gap-2">
+                <i class="fas fa-scroll text-amber-500"></i> CARA BERMAIN & PERATURAN
+            </h2>
+            <div class="bg-sky-50 p-4 rounded-2xl border border-sky-200 max-h-80 overflow-y-auto space-y-3 text-slate-700 text-sm mb-6">
+                <div class="flex gap-3 items-start"><span class="bg-sky-500 text-white w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold shrink-0">1</span> Isikan Nama Lengkap dan pilih Kelasmu (7D, 7E, 7F, atau 7G).</div>
+                <div class="flex gap-3 items-start"><span class="bg-sky-500 text-white w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold shrink-0">2</span> Ada 6 Wilayah Petualangan Gerak yang harus diselesaikan bertahap.</div>
+                <div class="flex gap-3 items-start"><span class="bg-sky-500 text-white w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold shrink-0">3</span> Di setiap wilayah, kamu bisa membaca Materi IPA dan memainkan Mini-Game Arena.</div>
+                <div class="flex gap-3 items-start"><span class="bg-sky-500 text-white w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold shrink-0">4</span> Gunakan Tombol Layar atau Keyboard (Panah / A-D / Spasi) untuk menggerakkan Karakter.</div>
+                <div class="flex gap-3 items-start"><span class="bg-sky-500 text-white w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold shrink-0">5</span> Kumpulkan Koin Emas & Bintang Pengetahuan di jalan.</div>
+                <div class="flex gap-3 items-start"><span class="bg-sky-500 text-white w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold shrink-0">6</span> Jawab Tantangan Kuis di Peti Harta Karun untuk membuka kunci wilayah berikutnya!</div>
+                <div class="flex gap-3 items-start"><span class="bg-sky-500 text-white w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold shrink-0">7</span> Raih Nilai Akhir Sempurna dan dapatkan Lencana Penjelajah Sejati!</div>
+            </div>
+            <div class="flex flex-wrap gap-3 justify-between">
+                <button onclick="speakRules()" class="bg-amber-500 hover:bg-amber-600 text-white font-bold px-4 py-3 rounded-xl flex items-center gap-2">
+                    <i class="fas fa-volume-up"></i> Dengarkan Peraturan
+                </button>
+                <button onclick="showScreen('screen-welcome')" class="bg-emerald-500 hover:bg-emerald-600 text-white font-black px-6 py-3 rounded-xl flex items-center gap-2">
+                    <i class="fas fa-check"></i> MENGERTI, AYO BERMAIN!
+                </button>
+            </div>
+        </section>
+
+        <!-- 3. ABOUT SCREEN -->
+        <section id="screen-about" class="hidden max-w-xl w-full bg-white rounded-3xl p-6 sm:p-8 shadow-2xl border-4 border-slate-400 text-slate-700">
+            <h2 class="text-2xl font-black text-slate-800 mb-4 flex items-center gap-2">
+                <i class="fas fa-graduation-cap text-amber-500"></i> Tentangg Game Ini
+            </h2>
+            <p class="text-sm leading-relaxed mb-4">
+                <strong>Petualangan Penjelajah Gerak</strong> adalah media pembelajaran interaktif berbasis game (Game-Based Learning) IPA SMP Kelas VII Semester Ganjil khusus materi <strong>Gerak Benda</strong>.
+            </p>
+            <div class="bg-slate-100 p-4 rounded-xl text-xs space-y-2 mb-6">
+                <p><strong>Kurikulum:</strong> Kurikulum Merdeka / K13 IPA SMP</p>
+                <p><strong>Capaian Pembelajaran:</strong> Memahami konsep Gerak, Titik Acuan, Jarak, Perpindahan, Kelajuan, Kecepatan, Percepatan, GLB, dan GLBB.</p>
+                <p><strong>Pengembang:</strong> Tim Guru IPA SMP Negeri 1 Muara Rupit</p>
+            </div>
+            <button onclick="showScreen('screen-welcome')" class="w-full bg-slate-700 hover:bg-slate-800 text-white font-bold py-3 rounded-xl">
+                Kembali ke Halaman Utama
+            </button>
+        </section>
+
+        <!-- 4. MAP / REGION SELECTOR SCREEN -->
+        <section id="screen-map" class="hidden max-w-4xl w-full bg-emerald-800 rounded-3xl p-6 shadow-2xl border-4 border-emerald-600 text-white relative">
+            <div class="flex justify-between items-center mb-6">
+                <div>
+                    <h2 class="text-2xl sm:text-3xl font-black text-yellow-300">PETA DUKUN GERAK</h2>
+                    <p class="text-xs sm:text-sm text-emerald-200">Pilih wilayah petualangan yang terbuka untuk mengumpulkan Harta Karun!</p>
+                </div>
+                <button onclick="showScreen('screen-welcome')" class="bg-emerald-700 hover:bg-emerald-600 px-3 py-1.5 rounded-lg text-xs font-bold border border-emerald-500">
+                    <i class="fas fa-home"></i> Menu
+                </button>
+            </div>
+
+            <!-- Regions Grid -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 mb-6">
+                <!-- Region 1 -->
+                <div id="card-region-1" class="bg-emerald-900 border-2 border-yellow-400 rounded-2xl p-4 flex flex-col justify-between relative overflow-hidden shadow-lg">
+                    <div class="flex items-center gap-3 mb-2">
+                        <div class="w-10 h-10 rounded-full bg-yellow-400 text-emerald-950 font-black flex items-center justify-center text-lg">1</div>
+                        <div>
+                            <h3 class="font-bold text-yellow-300 text-sm">Desa Gerak Ceria</h3>
+                            <p class="text-[11px] text-emerald-200">Gerak & Titik Acuan</p>
+                        </div>
+                    </div>
+                    <button onclick="enterRegion(1)" class="w-full mt-3 bg-yellow-400 hover:bg-yellow-300 text-emerald-950 font-black py-2 rounded-xl text-xs shadow">
+                        JELAJAHI WILAYAH <i class="fas fa-arrow-right"></i>
+                    </button>
+                </div>
+
+                <!-- Region 2 -->
+                <div id="card-region-2" class="bg-slate-800 border-2 border-slate-600 rounded-2xl p-4 flex flex-col justify-between relative overflow-hidden opacity-75">
+                    <div class="flex items-center gap-3 mb-2">
+                        <div class="w-10 h-10 rounded-full bg-slate-600 text-white font-black flex items-center justify-center text-lg">2</div>
+                        <div>
+                            <h3 class="font-bold text-slate-200 text-sm">Hutan Jarak & Perpindahan</h3>
+                            <p class="text-[11px] text-slate-400">Jarak vs Perpindahan</p>
+                        </div>
+                    </div>
+                    <button id="btn-region-2" disabled onclick="enterRegion(2)" class="w-full mt-3 bg-slate-700 text-slate-400 font-bold py-2 rounded-xl text-xs cursor-not-allowed">
+                        <i class="fas fa-lock"></i> TERKUNCI
+                    </button>
+                </div>
+
+                <!-- Region 3 -->
+                <div id="card-region-3" class="bg-slate-800 border-2 border-slate-600 rounded-2xl p-4 flex flex-col justify-between relative opacity-75">
+                    <div class="flex items-center gap-3 mb-2">
+                        <div class="w-10 h-10 rounded-full bg-slate-600 text-white font-black flex items-center justify-center text-lg">3</div>
+                        <div>
+                            <h3 class="font-bold text-slate-200 text-sm">Jembatan Kelajuan</h3>
+                            <p class="text-[11px] text-slate-400">Menghitung Kelajuan</p>
+                        </div>
+                    </div>
+                    <button id="btn-region-3" disabled onclick="enterRegion(3)" class="w-full mt-3 bg-slate-700 text-slate-400 font-bold py-2 rounded-xl text-xs cursor-not-allowed">
+                        <i class="fas fa-lock"></i> TERKUNCI
+                    </button>
+                </div>
+
+                <!-- Region 4 -->
+                <div id="card-region-4" class="bg-slate-800 border-2 border-slate-600 rounded-2xl p-4 flex flex-col justify-between relative opacity-75">
+                    <div class="flex items-center gap-3 mb-2">
+                        <div class="w-10 h-10 rounded-full bg-slate-600 text-white font-black flex items-center justify-center text-lg">4</div>
+                        <div>
+                            <h3 class="font-bold text-slate-200 text-sm">Kota Kecepatan</h3>
+                            <p class="text-[11px] text-slate-400">Kecepatan & Arah</p>
+                        </div>
+                    </div>
+                    <button id="btn-region-4" disabled onclick="enterRegion(4)" class="w-full mt-3 bg-slate-700 text-slate-400 font-bold py-2 rounded-xl text-xs cursor-not-allowed">
+                        <i class="fas fa-lock"></i> TERKUNCI
+                    </button>
+                </div>
+
+                <!-- Region 5 -->
+                <div id="card-region-5" class="bg-slate-800 border-2 border-slate-600 rounded-2xl p-4 flex flex-col justify-between relative opacity-75">
+                    <div class="flex items-center gap-3 mb-2">
+                        <div class="w-10 h-10 rounded-full bg-slate-600 text-white font-black flex items-center justify-center text-lg">5</div>
+                        <div>
+                            <h3 class="font-bold text-slate-200 text-sm">Pegunungan Percepatan</h3>
+                            <p class="text-[11px] text-slate-400">Percepatan (m/s²)</p>
+                        </div>
+                    </div>
+                    <button id="btn-region-5" disabled onclick="enterRegion(5)" class="w-full mt-3 bg-slate-700 text-slate-400 font-bold py-2 rounded-xl text-xs cursor-not-allowed">
+                        <i class="fas fa-lock"></i> TERKUNCI
+                    </button>
+                </div>
+
+                <!-- Region 6 -->
+                <div id="card-region-6" class="bg-slate-800 border-2 border-slate-600 rounded-2xl p-4 flex flex-col justify-between relative opacity-75">
+                    <div class="flex items-center gap-3 mb-2">
+                        <div class="w-10 h-10 rounded-full bg-slate-600 text-white font-black flex items-center justify-center text-lg">6</div>
+                        <div>
+                            <h3 class="font-bold text-slate-200 text-sm">Pulau Gerak Lurus</h3>
+                            <p class="text-[11px] text-slate-400">GLB & GLBB</p>
+                        </div>
+                    </div>
+                    <button id="btn-region-6" disabled onclick="enterRegion(6)" class="w-full mt-3 bg-slate-700 text-slate-400 font-bold py-2 rounded-xl text-xs cursor-not-allowed">
+                        <i class="fas fa-lock"></i> TERKUNCI
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- 5. LEARNING MATERIAL SCREEN (Before Minigame) -->
+        <section id="screen-material" class="hidden max-w-3xl w-full bg-white rounded-3xl p-6 sm:p-8 shadow-2xl border-4 border-amber-400 text-slate-800">
+            <div class="flex items-center justify-between mb-4 pb-3 border-b border-amber-200">
+                <span id="material-region-badge" class="bg-amber-100 text-amber-800 font-black text-xs px-3 py-1 rounded-full">WILAYAH 1</span>
+                <button onclick="speakMaterial()" class="text-xs bg-amber-500 hover:bg-amber-600 text-white font-bold px-3 py-1.5 rounded-lg flex items-center gap-1">
+                    <i class="fas fa-volume-up"></i> Baca Materi
+                </button>
+            </div>
+
+            <h2 id="material-title" class="text-2xl sm:text-3xl font-black text-amber-600 mb-3">Mengenal Gerak & Titik Acuan</h2>
+
+            <div id="material-content" class="bg-amber-50 p-5 rounded-2xl border border-amber-200 text-sm sm:text-base leading-relaxed space-y-3 mb-6 max-h-80 overflow-y-auto">
+                <!-- Dynamic Content Loaded via JS -->
+            </div>
+
+            <div class="flex justify-between items-center">
+                <button onclick="showScreen('screen-map')" class="bg-slate-300 hover:bg-slate-400 font-bold px-4 py-2.5 rounded-xl text-sm">
+                    <i class="fas fa-arrow-left"></i> Kembali ke Peta
+                </button>
+                <button onclick="startMiniGame()" class="bg-emerald-500 hover:bg-emerald-600 text-white font-black px-6 py-3 rounded-xl shadow-lg border-b-4 border-emerald-700 flex items-center gap-2">
+                    MULAI MISI PETUALANGAN <i class="fas fa-play"></i>
+                </button>
+            </div>
+        </section>
+
+        <!-- 6. GAMEPLAY CANVAS SCREEN -->
+        <section id="screen-game" class="hidden max-w-4xl w-full flex flex-col items-center">
+            
+            <div class="w-full bg-slate-800 rounded-2xl p-3 mb-2 flex justify-between items-center text-white text-xs sm:text-sm">
+                <div class="flex items-center gap-2">
+                    <i class="fas fa-map-marker-alt text-amber-400"></i>
+                    <span id="game-region-name" class="font-bold text-amber-300">Desa Gerak Ceria</span>
+                </div>
+                <div class="text-emerald-300 font-semibold">
+                    <i class="fas fa-bullseye"></i> Misi: Kumpulkan koin dan buka Peti Harta Karun!
+                </div>
+            </div>
+
+            <!-- Canvas Container -->
+            <div class="relative w-full aspect-[16/9] max-h-[450px]">
+                <canvas id="gameCanvas" class="w-full h-full"></canvas>
+
+                <!-- On-Screen Controls for Mobile -->
+                <div class="absolute bottom-3 left-3 flex gap-2 sm:hidden">
+                    <button id="btn-left" class="w-12 h-12 bg-slate-900/70 active:bg-amber-500 text-white font-bold rounded-full border-2 border-white flex items-center justify-center text-xl">
+                        <i class="fas fa-arrow-left"></i>
+                    </button>
+                    <button id="btn-right" class="w-12 h-12 bg-slate-900/70 active:bg-amber-500 text-white font-bold rounded-full border-2 border-white flex items-center justify-center text-xl">
+                        <i class="fas fa-arrow-right"></i>
+                    </button>
+                </div>
+                <div class="absolute bottom-3 right-3 sm:hidden">
+                    <button id="btn-jump" class="w-14 h-14 bg-emerald-600/80 active:bg-emerald-500 text-white font-black rounded-full border-2 border-white flex items-center justify-center text-xl shadow-lg">
+                        JUMP
+                    </button>
+                </div>
+            </div>
+
+            <div class="w-full flex justify-between items-center mt-3 text-white text-xs px-2">
+                <span><i class="fas fa-keyboard mr-1"></i> Kontrol PC: Panah / A-D (Jalan) & Spasi (Lompat)</span>
+                <button onclick="showScreen('screen-material')" class="bg-amber-600 hover:bg-amber-500 px-3 py-1 rounded text-white font-bold">
+                    <i class="fas fa-book"></i> Cek Materi
+                </button>
+            </div>
+        </section>
+
+        <!-- 7. QUIZ / TREASURE CHEST MODAL -->
+        <div id="modal-quiz" class="hidden fixed inset-0 bg-slate-950/80 z-50 flex items-center justify-center p-4">
+            <div class="bg-white rounded-3xl max-w-lg w-full p-6 shadow-2xl border-4 border-yellow-400 relative animate-bounce-short">
+                <div class="absolute -top-10 left-1/2 -translate-x-1/2 bg-yellow-400 border-4 border-amber-600 w-16 h-16 rounded-2xl flex items-center justify-center text-3xl shadow-lg">
+                    <i class="fas fa-box-open text-amber-900"></i>
+                </div>
+                
+                <div class="mt-6 text-center">
+                    <span class="bg-amber-100 text-amber-800 font-bold text-xs px-3 py-1 rounded-full">TANTANGAN HARTA KARUN</span>
+                    <h3 id="quiz-question" class="text-lg sm:text-xl font-black text-slate-800 mt-3 mb-4">
+                        Pertanyaan Kuis Akan Muncul di Sini...
+                    </h3>
+                </div>
+
+                <!-- Options -->
+                <div id="quiz-options" class="space-y-2 mb-4">
+                    <!-- Dynamic Buttons -->
+                </div>
+
+                <!-- Explanation Box -->
+                <div id="quiz-feedback" class="hidden p-3 rounded-xl text-xs sm:text-sm font-semibold mb-4 text-center"></div>
+
+                <div class="flex justify-end">
+                    <button id="btn-quiz-next" disabled onclick="nextQuizOrFinish()" class="bg-slate-400 text-white font-black px-6 py-2.5 rounded-xl text-sm">
+                        Lanjutkan Petualangan <i class="fas fa-arrow-right ml-1"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 8. FINAL RESULT SCREEN -->
+        <section id="screen-result" class="hidden max-w-2xl w-full bg-white rounded-3xl p-6 sm:p-10 shadow-2xl border-4 border-yellow-400 text-center relative">
+            <div class="inline-block bg-yellow-100 text-yellow-800 font-black px-4 py-1.5 rounded-full text-sm mb-3">
+                <i class="fas fa-trophy mr-1"></i> MISI PETUALANGAN SELESAI!
+            </div>
+            
+            <h2 class="text-2xl sm:text-4xl font-black text-amber-500 mb-1">SELAMAT, PENJELAJAH CILIK!</h2>
+            <p class="text-slate-600 font-bold mb-6 text-sm sm:text-base">Kamu Berhasil Menemukan Harta Karun Ilmu Pengetahuan!</p>
+
+            <!-- Card Result -->
+            <div class="bg-amber-50 rounded-2xl p-5 border-2 border-amber-200 text-left mb-6 space-y-3">
+                <div class="flex justify-between items-center border-b border-amber-200 pb-2">
+                    <span class="text-slate-600 font-bold text-sm">Nama Pemain:</span>
+                    <span id="res-name" class="font-black text-slate-800">Nama</span>
+                </div>
+                <div class="flex justify-between items-center border-b border-amber-200 pb-2">
+                    <span class="text-slate-600 font-bold text-sm">Kelas:</span>
+                    <span id="res-class" class="font-black text-amber-600">7D</span>
+                </div>
+                <div class="flex justify-between items-center border-b border-amber-200 pb-2">
+                    <span class="text-slate-600 font-bold text-sm">Wilayah Ditaklukkan:</span>
+                    <span id="res-regions" class="font-black text-emerald-600">6 / 6</span>
+                </div>
+                <div class="flex justify-between items-center border-b border-amber-200 pb-2">
+                    <span class="text-slate-600 font-bold text-sm">Koin Emas Collected:</span>
+                    <span id="res-coins" class="font-black text-yellow-600">0</span>
+                </div>
+                <div class="flex justify-between items-center border-b border-amber-200 pb-2">
+                    <span class="text-slate-600 font-bold text-sm">Akurasi Kuis:</span>
+                    <span id="res-accuracy" class="font-black text-sky-600">100%</span>
+                </div>
+                <div class="flex justify-between items-center pt-1">
+                    <span class="text-slate-700 font-black text-base">NILAI AKHIR IPA:</span>
+                    <span id="res-score" class="text-3xl font-black text-emerald-600">100</span>
+                </div>
+            </div>
+
+            <!-- Badge Award -->
+            <div class="bg-emerald-100 p-4 rounded-xl border border-emerald-300 flex items-center justify-center gap-3 mb-6">
+                <i class="fas fa-award text-4xl text-emerald-600"></i>
+                <div class="text-left">
+                    <p class="text-xs font-bold text-emerald-800">Lencana Penghargaan:</p>
+                    <p id="res-badge" class="font-black text-emerald-950 text-sm">MASTER PENJELAJAH GERAK IPA</p>
+                </div>
+            </div>
+
+            <!-- Buttons -->
+            <div class="flex flex-col sm:flex-row gap-3 justify-center">
+                <button onclick="window.print()" class="bg-sky-500 hover:bg-sky-600 text-white font-bold py-3 px-6 rounded-xl text-sm flex items-center justify-center gap-2">
+                    <i class="fas fa-print"></i> Cetak Hasil / Sertifikat
+                </button>
+                <button onclick="restartGame()" class="bg-emerald-500 hover:bg-emerald-600 text-white font-black py-3 px-6 rounded-xl text-sm flex items-center justify-center gap-2">
+                    <i class="fas fa-redo"></i> Ulangi Petualangan
+                </button>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="text-center p-3 text-xs text-slate-400">
+        &copy; 2026 Petualangan Penjelajah Gerak IPA - SMP Negeri 1 Muara Rupit. All rights reserved.
+    </footer>
+
+    <!-- GAME LOGIC JAVASCRIPT -->
+    <script>
+        // --- GAME STATE ---
+        const gameState = {
+            playerName: '',
+            playerClass: '',
+            currentRegion: 1,
+            unlockedRegion: 1,
+            coins: 0,
+            stars: 0,
+            totalQuestions: 0,
+            correctQuestions: 0,
+            audioEnabled: true,
+            synth: null
+        };
+
+        // --- REGION DATA & SCIENCE CONTENT ---
+        const regionsData = {
+            1: {
+                name: "Desa Gerak Ceria",
+                topic: "Gerak & Titik Acuan",
+                material: `
+                    <p class="font-bold text-amber-900">1. Apa itu Gerak?</p>
+                    <p>Suatu benda dikatakan <strong>bergerak</strong> jika posisinya berubah terhadap suatu <strong>titik acuan</strong> tertentu seiring berjalannya waktu.</p>
+                    <p class="font-bold text-amber-900 mt-2">2. Apa itu Titik Acuan?</p>
+                    <p>Titik acuan adalah titik/lokasi awal yang digunakan untuk menilai perubahan posisi suatu benda.</p>
+                    <p class="bg-white p-3 rounded-lg border border-amber-300 text-xs mt-2">
+                        <strong>Contoh Nyata:</strong> Saat kamu naik bus dan melihat pohon di pinggir jalan, kamu bergerak terhadap pohon. Namun, kamu TIDAK bergerak terhadap sopir bus di sampingmu!
+                    </p>
+                `,
+                quiz: {
+                    q: "Seorang anak duduk di dalam kereta api yang berjalan meninggalkan stasiun. Anak tersebut dikatakan BERGERAK terhadap...",
+                    options: [
+                        "Kursi kereta api",
+                        "Stasiun kereta api",
+                        "Tas yang dipegangnya",
+                        "Jendela kereta"
+                    ],
+                    answer: 1,
+                    explanation: "Benar! Anak berubah posisi terhadap Stasiun (titik acuan), tetapi tidak berubah posisi terhadap kursi kereta."
+                }
+            },
+            2: {
+                name: "Hutan Jarak & Perpindahan",
+                topic: "Jarak Tempuh vs Perpindahan",
+                material: `
+                    <p class="font-bold text-amber-900">1. Jarak (Skalar)</p>
+                    <p><strong>Jarak</strong> adalah panjang seluruh lintasan yang ditempuh oleh benda tanpa memperhitungkan arah.</p>
+                    <p class="font-bold text-amber-900 mt-2">2. Perpindahan (Vektor)</p>
+                    <p><strong>Perpindahan</strong> adalah perubahan posisi dari titik awal ke titik akhir (garis lurus) beserta arahnya.</p>
+                    <p class="bg-white p-3 rounded-lg border border-amber-300 text-xs mt-2">
+                        <strong>Contoh Hitungan:</strong> Andi berjalan ke timur sejauh 10 meter, lalu balik lagi ke barat sejauh 4 meter.<br>
+                        • Jarak = 10m + 4m = <strong>14 meter</strong>.<br>
+                        • Perpindahan = 10m - 4m = <strong>6 meter ke timur</strong>.
+                    </p>
+                `,
+                quiz: {
+                    q: "Rani berjalan 8 meter ke utara, lalu kembali 3 meter ke selatan. Berapakah JARAK dan PERPINDAHAN Rani?",
+                    options: [
+                        "Jarak 11 m, Perpindahan 5 m",
+                        "Jarak 5 m, Perpindahan 11 m",
+                        "Jarak 11 m, Perpindahan 11 m",
+                        "Jarak 5 m, Perpindahan 5 m"
+                    ],
+                    answer: 0,
+                    explanation: "Tepat Sekali! Jarak total = 8 + 3 = 11 meter. Perpindahan posisi awal ke akhir = 8 - 3 = 5 meter."
+                }
+            },
+            3: {
+                name: "Jembatan Kelajuan",
+                topic: "Menghitung Kelajuan",
+                material: `
+                    <p class="font-bold text-amber-900">1. Pengertian Kelajuan</p>
+                    <p><strong>Kelajuan</strong> adalah cepat lambatnya perubahan jarak terhadap waktu. Kelajuan tidak mempunyai arah.</p>
+                    <p class="font-bold text-amber-900 mt-2">2. Rumus Kelajuan</p>
+                    <p class="text-center font-mono font-bold bg-amber-100 p-2 rounded">v = s / t</p>
+                    <p class="text-xs">Di mana: <strong>v</strong> = Kelajuan (m/s), <strong>s</strong> = Jarak (m), <strong>t</strong> = Waktu (s).</p>
+                `,
+                quiz: {
+                    q: "Sebuah mobil menempuh jarak 100 meter dalam waktu 20 sekon. Berapakah kelajuan mobil tersebut?",
+                    options: [
+                        "2 m/s",
+                        "5 m/s",
+                        "2000 m/s",
+                        "80 m/s"
+                    ],
+                    answer: 1,
+                    explanation: "Hebat! v = s / t = 100m / 20s = 5 m/s."
+                }
+            },
+            4: {
+                name: "Kota Kecepatan",
+                topic: "Kecepatan & Arah Gerak",
+                material: `
+                    <p class="font-bold text-amber-900">1. Kecepatan (Velocity)</p>
+                    <p><strong>Kecepatan</strong> adalah besarnya perpindahan benda per satuan waktu dan memilik arah gerak tertentu.</p>
+                    <p class="font-bold text-amber-900 mt-2">2. Perbedaan Kelajuan & Kecepatan</p>
+                    <p class="text-xs">
+                        • Spedometer kendaraan mengukur <em>Kelajuan</em>.<br>
+                        • GPS yang menunjukkan kecepatan beserta arah (contoh: 60 km/jam ke barat) mengukur <em>Kecepatan</em>.
+                    </p>
+                `,
+                quiz: {
+                    q: "Perbedaan utama antara Kelajuan dan Kecepatan adalah...",
+                    options: [
+                        "Kelajuan punya arah, Kecepatan tidak punya arah",
+                        "Kecepatan punya arah (vektor), Kelajuan hanya punya nilai (skalar)",
+                        "Kelajuan diukur dalam sekon, kecepatan dalam meter",
+                        "Tidak ada perbedaan sama sekali"
+                    ],
+                    answer: 1,
+                    explanation: "Luar biasa! Kecepatan memperhitungkan arah gerak benda, sedangkan kelajuan hanya besarnya."
+                }
+            },
+            5: {
+                name: "Pegunungan Percepatan",
+                topic: "Percepatan Benda (a)",
+                material: `
+                    <p class="font-bold text-amber-900">1. Apa itu Percepatan?</p>
+                    <p><strong>Percepatan (a)</strong> adalah perubahan kecepatan tiap satuan waktu. Satuan SI untuk percepatan adalah <strong>m/s²</strong>.</p>
+                    <p class="font-bold text-amber-900 mt-2">2. Rumus Percepatan Rata-Rata</p>
+                    <p class="text-center font-mono font-bold bg-amber-100 p-2 rounded">a = (v_akhir - v_awal) / t</p>
+                    <p class="text-xs">Jika benda dipercepat nilainya positif (+). Jika pengereman/diperlambat nilainya negatif (-).</p>
+                `,
+                quiz: {
+                    q: "Sepeda motor melaju dengan kecepatan awal 2 m/s lalu bertambah menjadi 8 m/s dalam waktu 3 sekon. Berapakah percepatannya?",
+                    options: [
+                        "2 m/s²",
+                        "3 m/s²",
+                        "6 m/s²",
+                        "10 m/s²"
+                    ],
+                    answer: 0,
+                    explanation: "Pintar! a = (8 - 2) / 3 = 6 / 3 = 2 m/s²."
+                }
+            },
+            6: {
+                name: "Pulau Gerak Lurus",
+                topic: "GLB & GLBB",
+                material: `
+                    <p class="font-bold text-amber-900">1. GLB (Gerak Lurus Beraturan)</p>
+                    <p>Gerak benda pada lintasan lurus dengan <strong>kecepatan tetap / konstan</strong> (percepatan a = 0).</p>
+                    <p class="font-bold text-amber-900 mt-2">2. GLBB (Gerak Lurus Berubah Beraturan)</p>
+                    <p>Gerak benda pada lintasan lurus dengan <strong>percepatan tetap / konstan</strong> (kecepatan berubah secara teratur).</p>
+                    <p class="bg-white p-3 rounded-lg border border-amber-300 text-xs mt-2">
+                        <strong>Contoh GLBB:</strong> Buah kelapa jatuh dari pohon (dipercepat) atau mobil direm sampai berhenti (diperlambat).
+                    </p>
+                `,
+                quiz: {
+                    q: "Buah mangga yang jatuh bebas dari pohonnya merupakan contoh fenomena...",
+                    options: [
+                        "GLB (Kecepatan tetap)",
+                        "GLBB dipercepat",
+                        "GLBB diperlambat",
+                        "Gerak melingkar"
+                    ],
+                    answer: 1,
+                    explanation: "Sempurna! Buah jatuh mengalami percepatan akibat gravitasi bumi sehingga merupakan GLBB dipercepat!"
+                }
+            }
+        };
+
+        // --- AUDIO ENGINE (Web Speech & AudioSynth) ---
+        function playSound(type) {
+            if (!gameState.audioEnabled) return;
+            try {
+                const ctx = new (window.AudioContext || window.webkitAudioContext)();
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+
+                if (type === 'jump') {
+                    osc.frequency.setValueAtTime(150, ctx.currentTime);
+                    osc.frequency.exponentialRampToValueAtTime(400, ctx.currentTime + 0.15);
+                    gain.gain.setValueAtTime(0.3, ctx.currentTime);
+                    gain.gain.linearRampToValueAtTime(0.01, ctx.currentTime + 0.15);
+                    osc.start();
+                    osc.stop(ctx.currentTime + 0.15);
+                } else if (type === 'coin') {
+                    osc.frequency.setValueAtTime(800, ctx.currentTime);
+                    osc.frequency.setValueAtTime(1200, ctx.currentTime + 0.08);
+                    gain.gain.setValueAtTime(0.3, ctx.currentTime);
+                    gain.gain.linearRampToValueAtTime(0.01, ctx.currentTime + 0.2);
+                    osc.start();
+                    osc.stop(ctx.currentTime + 0.2);
+                } else if (type === 'chest') {
+                    osc.frequency.setValueAtTime(400, ctx.currentTime);
+                    osc.frequency.setValueAtTime(600, ctx.currentTime + 0.1);
+                    osc.frequency.setValueAtTime(800, ctx.currentTime + 0.2);
+                    gain.gain.setValueAtTime(0.4, ctx.currentTime);
+                    gain.gain.linearRampToValueAtTime(0.01, ctx.currentTime + 0.4);
+                    osc.start();
+                    osc.stop(ctx.currentTime + 0.4);
+                } else if (type === 'win') {
+                    osc.frequency.setValueAtTime(523.25, ctx.currentTime);
+                    osc.frequency.setValueAtTime(659.25, ctx.currentTime + 0.15);
+                    osc.frequency.setValueAtTime(783.99, ctx.currentTime + 0.3);
+                    gain.gain.setValueAtTime(0.4, ctx.currentTime);
+                    gain.gain.linearRampToValueAtTime(0.01, ctx.currentTime + 0.6);
+                    osc.start();
+                    osc.stop(ctx.currentTime + 0.6);
+                }
+            } catch (e) {
+                console.log("Audio not allowed yet");
+            }
+        }
+
+        function speakText(text) {
+            if (!gameState.audioEnabled) return;
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel();
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.lang = 'id-ID';
+                utterance.rate = 0.95;
+                window.speechSynthesis.speak(utterance);
+            }
+        }
+
+        function toggleAudio() {
+            gameState.audioEnabled = !gameState.audioEnabled;
+            const icon = document.getElementById('audio-icon');
+            if (gameState.audioEnabled) {
+                icon.className = 'fas fa-volume-up';
+                speakText("Suara diaktifkan");
+            } else {
+                icon.className = 'fas fa-volume-mute';
+                if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+            }
+        }
+
+        // --- NAVIGATION & UI LOGIC ---
+        function showScreen(screenId) {
+            const screens = ['screen-welcome', 'screen-rules', 'screen-about', 'screen-map', 'screen-material', 'screen-game', 'screen-result'];
+            screens.forEach(id => {
+                document.getElementById(id).classList.add('hidden');
+            });
+            document.getElementById(screenId).classList.remove('hidden');
+
+            const header = document.getElementById('game-header');
+            if (screenId !== 'screen-welcome' && screenId !== 'screen-rules' && screenId !== 'screen-about') {
+                header.classList.remove('hidden');
+            } else {
+                header.classList.add('hidden');
+            }
+        }
+
+        function selectClass(className) {
+            gameState.playerClass = className;
+            document.querySelectorAll('.btn-class').forEach(btn => {
+                if (btn.innerText === className) {
+                    btn.classList.add('bg-amber-400', 'text-amber-950', 'border-amber-600');
+                    btn.classList.remove('bg-white');
+                } else {
+                    btn.classList.remove('bg-amber-400', 'text-amber-950', 'border-amber-600');
+                    btn.classList.add('bg-white');
+                }
+            });
+        }
+
+        function startGame() {
+            const nameInput = document.getElementById('input-name').value.trim();
+            if (!nameInput) {
+                alert("Silakan masukkan nama lengkap kamu terlebih dahulu!");
+                return;
+            }
+            if (!gameState.playerClass) {
+                gameState.playerClass = "7D";
+            }
+            gameState.playerName = nameInput;
+
+            document.getElementById('header-player-name').innerText = gameState.playerName;
+            document.getElementById('header-player-class').innerText = gameState.playerClass;
+
+            speakText(`Halo ${gameState.playerName}! Selamat datang di Petualangan Penjelajah Gerak! Mari kita mulai petualangan mencari harta karun ilmu!`);
+            showScreen('screen-map');
+            updateMapUI();
+        }
+
+        function showRules() {
+            showScreen('screen-rules');
+        }
+
+        function speakRules() {
+            speakText("Peraturan permainan: Masukkan nama dan kelas. Ikuti peta wilayah. Gerakkan karakter untuk mengumpulkan koin. Jawab pertanyaan kuis IPA di peti harta karun untuk membuka level berikutnya!");
+        }
+
+        function showAbout() {
+            showScreen('screen-about');
+        }
+
+        function updateMapUI() {
+            for (let i = 2; i <= 6; i++) {
+                const card = document.getElementById(`card-region-${i}`);
+                const btn = document.getElementById(`btn-region-${i}`);
+                if (i <= gameState.unlockedRegion) {
+                    card.classList.remove('opacity-75', 'bg-slate-800', 'border-slate-600');
+                    card.classList.add('bg-emerald-900', 'border-yellow-400');
+                    btn.disabled = false;
+                    btn.className = "w-full mt-3 bg-yellow-400 hover:bg-yellow-300 text-emerald-950 font-black py-2 rounded-xl text-xs shadow";
+                    btn.innerHTML = 'JELAJAHI WILAYAH <i class="fas fa-arrow-right"></i>';
+                }
+            }
+            document.getElementById('score-coins').innerText = gameState.coins;
+            document.getElementById('score-stars').innerText = gameState.stars;
+        }
+
+        function enterRegion(regionNum) {
+            gameState.currentRegion = regionNum;
+            const data = regionsData[regionNum];
+            
+            document.getElementById('material-region-badge').innerText = `WILAYAH ${regionNum}`;
+            document.getElementById('material-title').innerText = data.name + " - " + data.topic;
+            document.getElementById('material-content').innerHTML = data.material;
+
+            showScreen('screen-material');
+            speakText(`Wilayah ${regionNum}: ${data.name}. Pelajari materi singkat ini sebelum memulai misi!`);
+        }
+
+        function speakMaterial() {
+            const text = document.getElementById('material-content').innerText;
+            speakText(text);
+        }
+
+        // --- 2D CANVAS GAME ENGINE ---
+        let canvas, ctx;
+        let animationFrameId;
+
+        const player = {
+            x: 50,
+            y: 200,
+            width: 35,
+            height: 45,
+            vx: 0,
+            vy: 0,
+            speed: 4,
+            jumpPower: -11,
+            grounded: false
+        };
+
+        let coins = [];
+        let chest = { x: 0, y: 0, width: 40, height: 40, opened: false };
+        const keys = { left: false, right: false, up: false };
+
+        function startMiniGame() {
+            showScreen('screen-game');
+            const data = regionsData[gameState.currentRegion];
+            document.getElementById('game-region-name').innerText = `${data.name} (${data.topic})`;
+
+            canvas = document.getElementById('gameCanvas');
+            ctx = canvas.getContext('2d');
+            
+            // Set internal resolution
+            canvas.width = 800;
+            canvas.height = 450;
+
+            // Reset player position
+            player.x = 50;
+            player.y = 300;
+            player.vx = 0;
+            player.vy = 0;
+
+            // Spawn Coins
+            coins = [
+                { x: 180, y: 280, collected: false },
+                { x: 320, y: 200, collected: false },
+                { x: 480, y: 240, collected: false },
+                { x: 620, y: 180, collected: false }
+            ];
+
+            // Spawn Chest
+            chest.x = 710;
+            chest.y = 330;
+            chest.opened = false;
+
+            // Event Listeners for Keyboard Controls
+            window.onkeydown = (e) => {
+                if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') keys.right = true;
+                if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') keys.left = true;
+                if ((e.key === 'ArrowUp' || e.key === 'w' || e.key === 'W' || e.key === ' ') && player.grounded) {
+                    player.vy = player.jumpPower;
+                    player.grounded = false;
+                    playSound('jump');
+                }
+            };
+            window.onkeyup = (e) => {
+                if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') keys.right = false;
+                if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') keys.left = false;
+            };
+
+            // Touch controls setup
+            setupTouchControls();
+
+            if (animationFrameId) cancelAnimationFrame(animationFrameId);
+            gameLoop();
+        }
+
+        function setupTouchControls() {
+            const btnLeft = document.getElementById('btn-left');
+            const btnRight = document.getElementById('btn-right');
+            const btnJump = document.getElementById('btn-jump');
+
+            btnLeft.ontouchstart = (e) => { e.preventDefault(); keys.left = true; };
+            btnLeft.ontouchend = (e) => { e.preventDefault(); keys.left = false; };
+            btnRight.ontouchstart = (e) => { e.preventDefault(); keys.right = true; };
+            btnRight.ontouchend = (e) => { e.preventDefault(); keys.right = false; };
+            btnJump.ontouchstart = (e) => { 
+                e.preventDefault(); 
+                if (player.grounded) { 
+                    player.vy = player.jumpPower; 
+                    player.grounded = false; 
+                    playSound('jump');
+                }
+            };
+        }
+
+        function gameLoop() {
+            updatePhysics();
+            renderCanvas();
+            animationFrameId = requestAnimationFrame(gameLoop);
+        }
+
+        function updatePhysics() {
+            // Horizontal movement
+            if (keys.right) player.vx = player.speed;
+            else if (keys.left) player.vx = -player.speed;
+            else player.vx = 0;
+
+            player.x += player.vx;
+            player.vy += 0.5; // Gravity
+            player.y += player.vy;
+
+            // Boundaries
+            if (player.x < 0) player.x = 0;
+            if (player.x + player.width > canvas.width) player.x = canvas.width - player.width;
+
+            // Platforms (Simple Ground & Blocks)
+            const groundY = 370;
+            if (player.y + player.height >= groundY) {
+                player.y = groundY - player.height;
+                player.vy = 0;
+                player.grounded = true;
+            }
+
+            // Platform blocks
+            const platforms = [
+                { x: 150, y: 320, w: 100, h: 15 },
+                { x: 290, y: 240, w: 100, h: 15 },
+                { x: 450, y: 280, w: 100, h: 15 },
+                { x: 600, y: 220, w: 90, h: 15 }
+            ];
+
+            platforms.forEach(plat => {
+                if (player.x + player.width > plat.x && player.x < plat.x + plat.w &&
+                    player.y + player.height >= plat.y && player.y + player.height <= plat.y + 15 && player.vy >= 0) {
+                    player.y = plat.y - player.height;
+                    player.vy = 0;
+                    player.grounded = true;
+                }
+            });
+
+            // Coin Pickups
+            coins.forEach(c => {
+                if (!c.collected && Math.hypot((player.x + 17) - c.x, (player.y + 22) - c.y) < 25) {
+                    c.collected = true;
+                    gameState.coins += 10;
+                    document.getElementById('score-coins').innerText = gameState.coins;
+                    playSound('coin');
+                }
+            });
+
+            // Chest Collision -> Trigger Quiz
+            if (!chest.opened && Math.abs((player.x + 17) - (chest.x + 20)) < 30 && Math.abs((player.y + 22) - (chest.y + 20)) < 35) {
+                chest.opened = true;
+                playSound('chest');
+                cancelAnimationFrame(animationFrameId);
+                openQuizModal();
+            }
+        }
+
+        function renderCanvas() {
+            // Background Sky Gradient
+            ctx.fillStyle = '#87CEEB';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Draw Sun & Clouds
+            ctx.fillStyle = '#FFF700';
+            ctx.beginPath();
+            ctx.arc(720, 70, 40, 0, Math.PI * 2);
+            ctx.fill();
+
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+            ctx.beginPath();
+            ctx.arc(120, 80, 25, 0, Math.PI * 2);
+            ctx.arc(145, 70, 35, 0, Math.PI * 2);
+            ctx.arc(170, 80, 25, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Ground
+            ctx.fillStyle = '#4ADE80';
+            ctx.fillRect(0, 370, canvas.width, 80);
+            ctx.fillStyle = '#166534';
+            ctx.fillRect(0, 370, canvas.width, 10);
+
+            // Draw Platforms
+            const platforms = [
+                { x: 150, y: 320, w: 100, h: 15 },
+                { x: 290, y: 240, w: 100, h: 15 },
+                { x: 450, y: 280, w: 100, h: 15 },
+                { x: 600, y: 220, w: 90, h: 15 }
+            ];
+            ctx.fillStyle = '#B45309';
+            platforms.forEach(p => {
+                ctx.fillRect(p.x, p.y, p.w, p.h);
+                ctx.fillStyle = '#65A30D';
+                ctx.fillRect(p.x, p.y, p.w, 4);
+                ctx.fillStyle = '#B45309';
+            });
+
+            // Draw Coins
+            coins.forEach(c => {
+                if (!c.collected) {
+                    ctx.fillStyle = '#FACC15';
+                    ctx.beginPath();
+                    ctx.arc(c.x, c.y, 10, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.strokeStyle = '#CA8A04';
+                    ctx.lineWidth = 2;
+                    ctx.stroke();
+                }
+            });
+
+            // Draw Chest
+            ctx.fillStyle = '#854D0E';
+            ctx.fillRect(chest.x, chest.y, chest.width, chest.height);
+            ctx.fillStyle = '#FACC15';
+            ctx.fillRect(chest.x + 15, chest.y + 15, 10, 10);
+
+            // Draw Player Cartoon Character
+            ctx.fillStyle = '#0EA5E9'; // Body Blue
+            ctx.fillRect(player.x, player.y + 15, player.width, 25);
+
+            ctx.fillStyle = '#FCA5A5'; // Head Pinkish Skin
+            ctx.beginPath();
+            ctx.arc(player.x + player.width/2, player.y + 12, 14, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Explorer Hat
+            ctx.fillStyle = '#D97706';
+            ctx.fillRect(player.x - 2, player.y - 2, player.width + 4, 6);
+            ctx.fillRect(player.x + 5, player.y - 10, player.width - 10, 8);
+
+            // Eyes
+            ctx.fillStyle = '#000';
+            ctx.fillRect(player.x + (keys.left ? 8 : 22), player.y + 9, 3, 3);
+        }
+
+        // --- QUIZ & TREASURE CHEST MODAL LOGIC ---
+        function openQuizModal() {
+            const data = regionsData[gameState.currentRegion].quiz;
+            document.getElementById('quiz-question').innerText = data.q;
+            
+            const optionsContainer = document.getElementById('quiz-options');
+            optionsContainer.innerHTML = '';
+            
+            document.getElementById('quiz-feedback').classList.add('hidden');
+            const nextBtn = document.getElementById('btn-quiz-next');
+            nextBtn.disabled = true;
+            nextBtn.className = "bg-slate-400 text-white font-black px-6 py-2.5 rounded-xl text-sm cursor-not-allowed";
+
+            data.options.forEach((opt, idx) => {
+                const btn = document.createElement('button');
+                btn.className = "w-full text-left bg-slate-100 hover:bg-amber-100 border-2 border-slate-200 p-3 rounded-xl font-bold text-xs sm:text-sm text-slate-700 transition flex justify-between items-center";
+                btn.innerHTML = `<span>${String.fromCharCode(65 + idx)}. ${opt}</span> <i class="far fa-circle text-slate-400"></i>`;
+                btn.onclick = () => checkQuizAnswer(idx, data.answer, data.explanation, btn);
+                optionsContainer.appendChild(btn);
+            });
+
+            document.getElementById('modal-quiz').classList.remove('hidden');
+            speakText("Tantangan Peti Harta Karun! Jawab pertanyaan berikut dengan teliti!");
+        }
+
+        function checkQuizAnswer(selectedIndex, correctIndex, explanation, btnElement) {
+            gameState.totalQuestions++;
+            const feedback = document.getElementById('quiz-feedback');
+            feedback.classList.remove('hidden');
+
+            // Disable all option buttons
+            const allBtns = document.getElementById('quiz-options').children;
+            for (let b of allBtns) b.onclick = null;
+
+            if (selectedIndex === correctIndex) {
+                gameState.correctQuestions++;
+                gameState.stars += 1;
+                document.getElementById('score-stars').innerText = gameState.stars;
+
+                btnElement.className = "w-full text-left bg-emerald-100 border-2 border-emerald-500 p-3 rounded-xl font-bold text-xs sm:text-sm text-emerald-900 flex justify-between items-center";
+                btnElement.querySelector('i').className = "fas fa-check-circle text-emerald-600 text-lg";
+
+                feedback.className = "p-3 rounded-xl text-xs sm:text-sm font-semibold mb-4 text-center bg-emerald-100 text-emerald-900 border border-emerald-300";
+                feedback.innerHTML = `<i class="fas fa-star text-yellow-500"></i> HEBAT SEKALI! Jawabanmu Benar!<br><span class="text-xs font-normal">${explanation}</span>`;
+
+                playSound('win');
+                speakText("Hebat sekali! Jawabanmu benar! Kamu mendapatkan bintang pengetahuan!");
+            } else {
+                btnElement.className = "w-full text-left bg-rose-100 border-2 border-rose-500 p-3 rounded-xl font-bold text-xs sm:text-sm text-rose-900 flex justify-between items-center";
+                btnElement.querySelector('i').className = "fas fa-times-circle text-rose-600 text-lg";
+
+                feedback.className = "p-3 rounded-xl text-xs sm:text-sm font-semibold mb-4 text-center bg-rose-100 text-rose-900 border border-rose-300";
+                feedback.innerHTML = `<i class="fas fa-info-circle"></i> Ups, Belum Tepat!<br><span class="text-xs font-normal">${explanation}</span>`;
+
+                speakText("Ups, belum tepat! Jangan berkecil hati, mari kita pelajari lagi!");
+            }
+
+            const nextBtn = document.getElementById('btn-quiz-next');
+            nextBtn.disabled = false;
+            nextBtn.className = "bg-emerald-500 hover:bg-emerald-600 text-white font-black px-6 py-2.5 rounded-xl text-sm shadow-lg border-b-4 border-emerald-700 cursor-pointer";
+        }
+
+        function nextQuizOrFinish() {
+            document.getElementById('modal-quiz').classList.add('hidden');
+
+            if (gameState.currentRegion < 6) {
+                if (gameState.unlockedRegion === gameState.currentRegion) {
+                    gameState.unlockedRegion++;
+                }
+                showScreen('screen-map');
+                updateMapUI();
+                speakText(`Selamat! Wilayah ${gameState.currentRegion + 1} sekarang telah terbuka!`);
+            } else {
+                // Game Finished!
+                showFinalResult();
+            }
+        }
+
+        function showFinalResult() {
+            showScreen('screen-result');
+
+            document.getElementById('res-name').innerText = gameState.playerName;
+            document.getElementById('res-class').innerText = gameState.playerClass;
+            document.getElementById('res-regions').innerText = "6 / 6 (Lengkap)";
+            document.getElementById('res-coins').innerText = gameState.coins;
+
+            const accuracy = gameState.totalQuestions > 0 ? Math.round((gameState.correctQuestions / gameState.totalQuestions) * 100) : 100;
+            document.getElementById('res-accuracy').innerText = `${accuracy}%`;
+
+            const finalScore = Math.min(100, Math.round((accuracy * 0.7) + (gameState.coins / 4)));
+            document.getElementById('res-score').innerText = finalScore;
+
+            let badge = "PENJELAJAH GERAK MUDA";
+            if (finalScore >= 90) badge = "MASTER PENJELAJAH GERAK UTAMA";
+            else if (finalScore >= 75) badge = "PENJELAJAH CERDAS GERAK IPA";
+
+            document.getElementById('res-badge').innerText = badge;
+
+            playSound('win');
+            speakText(`Selamat ${gameState.playerName}! Kamu telah menyelesaikan seluruh misi petualangan dengan nilai akhir ${finalScore}!`);
+        }
+
+        function restartGame() {
+            gameState.currentRegion = 1;
+            gameState.unlockedRegion = 1;
+            gameState.coins = 0;
+            gameState.stars = 0;
+            gameState.totalQuestions = 0;
+            gameState.correctQuestions = 0;
+            showScreen('screen-map');
+            updateMapUI();
+        }
+    </script>
+</body>
+</html>
